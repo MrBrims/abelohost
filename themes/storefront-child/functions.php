@@ -1,7 +1,7 @@
 <?php
 
-define('ABELOHOST_PATH', get_stylesheet_directory());
+define('ABELOHOST_PATH', __DIR__);
 
 if (!class_exists('AbeloHostCpt')) {
-	require ABELOHOST_PATH . '/inc/cpt.php';
+	require ABELOHOST_PATH . '/inc/Cpt.php';
 }
