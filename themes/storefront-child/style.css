@@ -1,0 +1,9 @@
+/**
+ * Theme Name: Abelo Host Child
+ * Template: storefront
+ *
+ * Version: 1.0
+ */
+
+/* импортируем стили родительской темы */
+@import url('../storefront/style.css');
