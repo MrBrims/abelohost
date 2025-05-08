@@ -6,6 +6,75 @@ if (!class_exists('AbeloHostCpt')) {
 		public function __construct()
 		{
 			add_action('init', [$this, 'custom_post_type']);
+			add_action('add_meta_boxes', [$this, 'add_metabox']);
+			add_action('save_post', [$this, 'save_metabox'], 10, 2);
+		}
+
+		//Class method to add custom meta box
+		public function add_metabox()
+		{
+			add_meta_box(
+				'coordinate_setting',
+				'Coordinate City',
+				[$this, 'metabox_city_html'],
+				'cities',
+				'normal',
+				'default'
+			);
+		}
+
+		//Class method to save custom meta box
+		public function save_metabox($post_id, $post)
+		{
+
+			if (!isset($_POST['_abelohost']) || !wp_verify_nonce($_POST['_abelohost'], 'abelohostfields')) {
+				return $post_id;
+			}
+
+			if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+				return $post_id;
+			}
+
+			if ($post->post_type != 'cities') {
+				return $post_id;
+			}
+
+			$post_type = get_post_type_object($post->post_type);
+			if (!current_user_can($post_type->cap->edit_post, $post_id)) {
+				return $post_id;
+			}
+
+			if (is_null($_POST['abelohost-latitude'])) {
+				delete_post_meta($post_id, 'abelohost-latitude');
+			} else {
+				update_post_meta($post_id, 'abelohost-latitude', sanitize_text_field($_POST['abelohost-latitude']));
+			}
+
+			if (is_null($_POST['abelohost-longitude'])) {
+				delete_post_meta($post_id, 'abelohost-longitude');
+			} else {
+				update_post_meta($post_id, 'abelohost-longitude', sanitize_text_field($_POST['abelohost-longitude']));
+			}
+		}
+
+		//Class method to display custom meta box
+		public function metabox_city_html($post)
+		{
+			$latitude = get_post_meta($post->ID, 'abelohost-latitude', true);
+			$longitude = get_post_meta($post->ID, 'abelohost-longitude', true);
+
+			wp_nonce_field('abelohostfields', '_abelohost');
+
+			echo '
+			<p>
+				<label for="abelohost-latitude">Latitude</label>
+					<input type="text" id="abelohost-latitude" name="abelohost-latitude" value="' . esc_html($latitude) . '">
+			</p>
+			<p>
+				<label for="abelohost-longitude">Longitude</label>
+					<input type="text" id="abelohost-longitude" name="abelohost-longitude" value="' . esc_html($longitude) . '">
+			</p>
+			';
 		}
 
 		//Class method to create custom post type
