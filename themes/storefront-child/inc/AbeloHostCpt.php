@@ -7,7 +7,15 @@ if (!class_exists('AbeloHostCpt')) {
 		{
 			add_action('init', [$this, 'custom_post_type']);
 			add_action('add_meta_boxes', [$this, 'add_metabox']);
+			add_action('add_meta_boxes', [$this, 'remove_default_metaboxes'], 20);
+			add_action('init', [$this, 'register_city_meta_fields']);
 			add_action('save_post', [$this, 'save_metabox'], 10, 2);
+		}
+
+		// Class method to remove default meta boxes
+		public function remove_default_metaboxes()
+		{
+			remove_meta_box('postcustom', 'cities', 'normal');
 		}
 
 		//Class method to add custom meta box
@@ -19,7 +27,7 @@ if (!class_exists('AbeloHostCpt')) {
 				[$this, 'metabox_city_html'],
 				'cities',
 				'normal',
-				'default'
+				'default',
 			);
 		}
 
@@ -77,12 +85,31 @@ if (!class_exists('AbeloHostCpt')) {
 			';
 		}
 
+
+		//Class method to register custom meta fields
+		public function register_city_meta_fields()
+		{
+			register_meta('post', 'abelohost-latitude', [
+				'type'         => 'string',
+				'description'  => 'Latitude of the city',
+				'single'       => true,
+				'show_in_rest' => true,
+			]);
+
+			register_meta('post', 'abelohost-longitude', [
+				'type'         => 'string',
+				'description'  => 'Longitude of the city',
+				'single'       => true,
+				'show_in_rest' => true,
+			]);
+		}
+
 		//Class method to create custom post type
 		public function custom_post_type()
 		{
 
 			//Register custom post type
-			$labelSities = [
+			$labelsSities = [
 				'name'                  => esc_html_x('Cities', 'Post type general name', 'storefront-child'),
 				'singular_name'         => esc_html_x('City', 'Post type singular name', 'storefront-child'),
 				'menu_name'             => esc_html_x('Cities', 'Admin Menu text', 'storefront-child'),
@@ -108,15 +135,18 @@ if (!class_exists('AbeloHostCpt')) {
 				'items_list_navigation' => esc_html_x('Cities list navigation', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'storefront-child'),
 				'items_list'            => esc_html_x('Cities list', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'storefront-child'),
 			];
-			$argCities = [
-				'label' 			=> null,
-				'labels' 			=> $labelSities,
-				'public' 			=> true,
-				'supports' 		=> ['title'],
-				'has_archive' => true,
-				'rewrite' 		=> ['slug' => 'cities']
+			$argsCities = [
+				'label' 				=> null,
+				'labels' 				=> $labelsSities,
+				'public' 				=> true,
+				'supports' 			=> ['title', 'custom-fields'],
+				'rest_base' 		=> 'cities',
+				'rest_controller_class' => 'WP_REST_Posts_Controller',
+				'has_archive' 	=> true,
+				'show_in_rest' 	=> true,
+				'rewrite' 			=> ['slug' => 'cities']
 			];
-			register_post_type('cities', $argCities);
+			register_post_type('cities', $argsCities);
 
 			//Register custom taxonomy
 			$labelsTaxonomy = [

@@ -1,7 +1,12 @@
 <?php
 
-define('ABELOHOST_PATH', __DIR__);
+// Include the widget registration class
+if (!class_exists('AbeloHostWidgetReg')) {
+	require __DIR__ . '/inc/AbeloHostWidgetReg.php';
+}
 
+
+// Include the custom post class
 if (!class_exists('AbeloHostCpt')) {
-	require ABELOHOST_PATH . '/inc/Cpt.php';
+	require __DIR__ . '/inc/AbeloHostCpt.php';
 }
