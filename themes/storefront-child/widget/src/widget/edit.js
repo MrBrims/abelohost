@@ -1,24 +1,68 @@
 import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
 import { PanelBody, SelectControl, Spinner } from "@wordpress/components";
 import { useSelect } from "@wordpress/data";
+import { useEffect, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import "./editor.scss";
 
+const OPENWEATHER_API_KEY = window._wpSettings?.weatherApiKey || "";
+
+// Weather retrieval function
+async function fetchWeatherData(lat, lon) {
+	try {
+		const response = await fetch(
+			`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=en`,
+		);
+
+		if (!response.ok) {
+			throw new Error(__("Error loading weather data", "storefront-child"));
+		}
+
+		return await response.json();
+	} catch (error) {
+		console.error("Error:", error);
+		throw error;
+	}
+}
+
 export default function Edit({ attributes, setAttributes }) {
 	const { option } = attributes;
+	const [weather, setWeather] = useState(null);
+	const [weatherLoading, setWeatherLoading] = useState(false);
+	const [weatherError, setWeatherError] = useState(null);
 
-	const { cities, isLoading } = useSelect((select) => {
-		return {
-			cities: select("core").getEntityRecords("postType", "cities"),
-			isLoading: select("core").isResolving("getEntityRecords", [
-				"postType",
-				"cities",
-			]),
+	const { cities, isLoading } = useSelect((select) => ({
+		cities: select("core").getEntityRecords("postType", "cities"),
+		isLoading: select("core").isResolving("getEntityRecords", [
+			"postType",
+			"cities",
+		]),
+	}));
+
+	useEffect(() => {
+		const fetchWeather = async () => {
+			if (!selectedCity) return;
+
+			setWeatherLoading(true);
+			try {
+				const data = await fetchWeatherData(
+					selectedCity.meta["abelohost-latitude"],
+					selectedCity.meta["abelohost-longitude"],
+				);
+				setWeather(data);
+				setWeatherError(null);
+			} catch (error) {
+				setWeatherError(error.message);
+			} finally {
+				setWeatherLoading(false);
+			}
 		};
-	});
-	console.log(cities);
+
+		fetchWeather();
+	}, [option, cities]);
 
 	const selectedCity = cities?.find((city) => city.id.toString() === option);
+
 	return (
 		<>
 			<InspectorControls>
@@ -50,30 +94,34 @@ export default function Edit({ attributes, setAttributes }) {
 			</InspectorControls>
 			<div {...useBlockProps()}>
 				<h3> {__("City weathers", "storefront-child")}</h3>
-				<p>
-					{__(
-						"City is selected in the widget settings (in the sitebar on the right)!",
-						"storefront-child",
-					)}
-				</p>
-				{isLoading ? (
-					<Spinner />
-				) : selectedCity ? (
+				{weatherLoading && <Spinner />}
+
+				{weatherError && (
+					<div className="notice notice-error">
+						{__("Error loading weather data:", "storefront-child")}{" "}
+						{weatherError}
+					</div>
+				)}
+
+				{weather && (
 					<div className="weather-widget">
 						<h2>{selectedCity.title.rendered}</h2>
-						<div className="coordinates">
+						<div className="weather-info">
 							<p>
-								{__("Latitude:", "storefront-child")}{" "}
-								{selectedCity.meta["abelohost-latitude"]}
+								{__("Temperature:", "storefront-child")} {weather.main.temp}°C
 							</p>
 							<p>
-								{__("Longitude:", "storefront-child")}{" "}
-								{selectedCity.meta["abelohost-longitude"]}
+								{__("Conditions:", "storefront-child")}{" "}
+								{weather.weather[0].description}
+							</p>
+							<p>
+								{__("Humidity:", "storefront-child")} {weather.main.humidity}%
+							</p>
+							<p>
+								{__("Wind Speed:", "storefront-child")} {weather.wind.speed} m/s
 							</p>
 						</div>
 					</div>
-				) : (
-					<p>{__("Select a city in settings", "storefront-child")}</p>
 				)}
 			</div>
 		</>
