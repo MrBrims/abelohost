@@ -42,7 +42,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const OPENWEATHER_API_KEY = window._wpSettings?.weatherApiKey || "";
+const OPENWEATHER_API_KEY = storefrontChildWeatherBlock.apiKey;
 
 // Weather retrieval function
 async function fetchWeatherData(lat, lon) {
@@ -114,6 +114,10 @@ function Edit({
       ...(0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps)(),
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("h3", {
         children: [" ", (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("City weathers", "storefront-child")]
+      }), !OPENWEATHER_API_KEY && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Notice, {
+        status: "error",
+        isDismissible: false,
+        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("API key is not configured. Please set it in Weather Settings.", "storefront-child")
       }), weatherLoading && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Spinner, {}), weatherError && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
         className: "notice notice-error",
         children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_4__.__)("Error loading weather data:", "storefront-child"), " ", weatherError]

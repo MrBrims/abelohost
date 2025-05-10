@@ -1,11 +1,16 @@
 import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
-import { PanelBody, SelectControl, Spinner } from "@wordpress/components";
+import {
+	PanelBody,
+	SelectControl,
+	Spinner,
+	Notice,
+} from "@wordpress/components";
 import { useSelect } from "@wordpress/data";
 import { useEffect, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import "./editor.scss";
 
-const OPENWEATHER_API_KEY = window._wpSettings?.weatherApiKey || "";
+const OPENWEATHER_API_KEY = storefrontChildWeatherBlock.apiKey;
 
 // Weather retrieval function
 async function fetchWeatherData(lat, lon) {
@@ -94,6 +99,15 @@ export default function Edit({ attributes, setAttributes }) {
 			</InspectorControls>
 			<div {...useBlockProps()}>
 				<h3> {__("City weathers", "storefront-child")}</h3>
+				{!OPENWEATHER_API_KEY && (
+					<Notice status="error" isDismissible={false}>
+						{__(
+							"API key is not configured. Please set it in Weather Settings.",
+							"storefront-child",
+						)}
+					</Notice>
+				)}
+
 				{weatherLoading && <Spinner />}
 
 				{weatherError && (

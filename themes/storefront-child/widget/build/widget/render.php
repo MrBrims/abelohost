@@ -1,6 +1,8 @@
 <?php
 
-if (!defined('OPENWEATHER_API_KEY')) {
+$api_key = get_option('openweather_api_key');
+
+if (empty($api_key)) {
 	echo '<div class="notice notice-error">' . esc_html__('OpenWeatherMap API key is not configured', 'storefront-child') . '</div>';
 	return;
 }
@@ -22,7 +24,7 @@ if (!$weather_data) {
 	$lon = get_post_meta($city_id, 'abelohost-longitude', true);
 
 	// Используем константу из wp-config.php
-	$api_url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=" . OPENWEATHER_API_KEY . "&units=metric&lang=en";
+	$api_url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=" . $api_key . "&units=metric&lang=en";
 
 	// Making a request
 	$response = wp_remote_get($api_url);

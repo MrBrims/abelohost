@@ -10,8 +10,7 @@ if (!class_exists('AbeloHostCpt')) {
 	require __DIR__ . '/inc/AbeloHostCpt.php';
 }
 
-add_action('admin_enqueue_scripts', function () {
-	wp_localize_script('abelohostwidget-widget-editor-script', '_wpSettings', [
-		'weatherApiKey' => defined('OPENWEATHER_API_KEY') ? OPENWEATHER_API_KEY : ''
-	]);
-});
+// Include the API settings class
+if (!class_exists('AbeloHostApi')) {
+	require __DIR__ . '/inc/AbeloHostApi.php';
+}

@@ -5,6 +5,7 @@ if (!class_exists('AbeloHostWidgetReg')) {
 		public function __construct()
 		{
 			add_action('init', [$this, 'abelohostwidget_widget_block_init']);
+			add_action('admin_enqueue_scripts', [$this, 'weather_localize']);
 		}
 
 		public function abelohostwidget_widget_block_init()
@@ -23,6 +24,13 @@ if (!class_exists('AbeloHostWidgetReg')) {
 			foreach (array_keys($manifest_data) as $block_type) {
 				register_block_type(dirname(__DIR__) . "/widget/build/{$block_type}");
 			}
+		}
+
+		public function weather_localize()
+		{
+			wp_localize_script('abelohostwidget-widget-editor-script', 'storefrontChildWeatherBlock', [
+				'apiKey' => get_option('openweather_api_key', '')
+			]);
 		}
 	}
 }
