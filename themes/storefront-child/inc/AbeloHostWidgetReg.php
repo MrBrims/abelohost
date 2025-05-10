@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * Handles registration of custom block widgets and API key localization
+ * Security features:
+ * - Validates WordPress functions before use
+ * - Securely handles API key retrieval
+ * - Uses WordPress filesystem API
+ */
 if (!class_exists('AbeloHostWidgetReg')) {
 	class AbeloHostWidgetReg
 	{
@@ -26,6 +34,10 @@ if (!class_exists('AbeloHostWidgetReg')) {
 			}
 		}
 
+		/**
+		 * Localize weather API key for block editor
+		 * @security Uses WordPress options API to securely retrieve stored key
+		 */
 		public function weather_localize()
 		{
 			wp_localize_script('abelohostwidget-widget-editor-script', 'storefrontChildWeatherBlock', [

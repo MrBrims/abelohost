@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Server-side weather block rendering
+ * 
+ * @param array $attributes Block attributes
+ */
+
+
+// Getting API key from WordPress settings
 $api_key = get_option('openweather_api_key');
 
 if (empty($api_key)) {
@@ -7,10 +15,11 @@ if (empty($api_key)) {
 	return;
 }
 
-
+// Setting up caching using the WordPress Transient API
 $transient_key = 'weather_data_' . $attributes['option'];
 $weather_data = get_transient($transient_key);
 
+// If the data is not in the cache - make a request to the API
 if (!$weather_data) {
 	$city_id = $attributes['option'] ?? 0;
 	$city = get_post($city_id);
@@ -23,7 +32,6 @@ if (!$weather_data) {
 	$lat = get_post_meta($city_id, 'abelohost-latitude', true);
 	$lon = get_post_meta($city_id, 'abelohost-longitude', true);
 
-	// Используем константу из wp-config.php
 	$api_url = "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=" . $api_key . "&units=metric&lang=en";
 
 	// Making a request

@@ -1,18 +1,25 @@
 import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
 import {
+	Notice,
 	PanelBody,
 	SelectControl,
 	Spinner,
-	Notice,
 } from "@wordpress/components";
 import { useSelect } from "@wordpress/data";
 import { useEffect, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import "./editor.scss";
 
+// API key for OpenWeatherMap, obtained from the theme's global settings
 const OPENWEATHER_API_KEY = storefrontChildWeatherBlock.apiKey;
 
-// Weather retrieval function
+/**
+ * Function for retrieving weather data from OpenWeather API
+ * @param {number} lat - Location latitude
+ * @param {number} lon - Longitude
+ * @returns {Promise<object>} Weather data object
+ * @throws {Error} In case of API request error
+ */
 async function fetchWeatherData(lat, lon) {
 	try {
 		const response = await fetch(
@@ -30,12 +37,19 @@ async function fetchWeatherData(lat, lon) {
 	}
 }
 
+/**
+ * Main component of weather block editing
+ * @param {object} props - Component properties
+ * @param {object} props.attributes - Block attributes
+ * @param {function} props.setAttributes - Attribute update function
+ */
 export default function Edit({ attributes, setAttributes }) {
 	const { option } = attributes;
 	const [weather, setWeather] = useState(null);
 	const [weatherLoading, setWeatherLoading] = useState(false);
 	const [weatherError, setWeatherError] = useState(null);
 
+	// Getting a list of cities from WordPress storage
 	const { cities, isLoading } = useSelect((select) => ({
 		cities: select("core").getEntityRecords("postType", "cities"),
 		isLoading: select("core").isResolving("getEntityRecords", [
@@ -44,6 +58,7 @@ export default function Edit({ attributes, setAttributes }) {
 		]),
 	}));
 
+	// Effect for loading weather data when the selected city changes
 	useEffect(() => {
 		const fetchWeather = async () => {
 			if (!selectedCity) return;
@@ -66,10 +81,12 @@ export default function Edit({ attributes, setAttributes }) {
 		fetchWeather();
 	}, [option, cities]);
 
+	// Search for the selected city in the list
 	const selectedCity = cities?.find((city) => city.id.toString() === option);
 
 	return (
 		<>
+			{/* Control panel in the editor sidebar */}
 			<InspectorControls>
 				<PanelBody title={__("Widget weathers setting", "storefront-child")}>
 					{isLoading ? (
@@ -97,6 +114,8 @@ export default function Edit({ attributes, setAttributes }) {
 					)}
 				</PanelBody>
 			</InspectorControls>
+
+			{/* The main content of the block */}
 			<div {...useBlockProps()}>
 				<h3> {__("City weathers", "storefront-child")}</h3>
 				{!OPENWEATHER_API_KEY && (
@@ -117,6 +136,7 @@ export default function Edit({ attributes, setAttributes }) {
 					</div>
 				)}
 
+				{/* Weather data box */}
 				{weather && (
 					<div className="weather-widget">
 						<h2>{selectedCity.title.rendered}</h2>

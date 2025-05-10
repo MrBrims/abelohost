@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * A class for creating a custom record type,
+ * custom taxonomy and meta fields
+ */
+
 if (!class_exists('AbeloHostCpt')) {
 	class AbeloHostCpt
 	{
@@ -184,39 +190,6 @@ if (!class_exists('AbeloHostCpt')) {
 			];
 
 			register_taxonomy($taxonomy_name, $post_types, $args);
-		}
-
-		public function display_countries_list()
-		{
-			global $wpdb;
-
-			$countries = $wpdb->get_results(
-				$wpdb->prepare("
-            SELECT t.name, t.slug 
-            FROM {$wpdb->terms} t 
-            INNER JOIN {$wpdb->term_taxonomy} tt 
-            ON t.term_id = tt.term_id 
-            WHERE tt.taxonomy = %s 
-            ORDER BY t.name ASC
-        ", 'countries')
-			);
-
-			if (!empty($countries)) {
-				echo '<div class="countries-list">';
-				echo '<h3>' . esc_html__('Список стран', 'storefront-child') . '</h3>';
-				echo '<ul>';
-				foreach ($countries as $country) {
-					echo '<li>';
-					echo '<a href="' . esc_url(get_term_link($country->slug, 'countries')) . '">';
-					echo esc_html($country->name);
-					echo '</a>';
-					echo '</li>';
-				}
-				echo '</ul>';
-				echo '</div>';
-			} else {
-				echo '<p>' . esc_html__('Страны не найдены', 'storefront-child') . '</p>';
-			}
 		}
 	}
 }
