@@ -14,3 +14,8 @@ if (!class_exists('AbeloHostCpt')) {
 if (!class_exists('AbeloHostApi')) {
 	require __DIR__ . '/inc/AbeloHostApi.php';
 }
+
+// Include the count class
+if (!class_exists('AbeloHostCount')) {
+	require __DIR__ . '/inc/AbeloHostCount.php';
+}

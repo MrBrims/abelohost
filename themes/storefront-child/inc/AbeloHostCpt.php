@@ -148,32 +148,75 @@ if (!class_exists('AbeloHostCpt')) {
 			];
 			register_post_type('cities', $argsCities);
 
-			//Register custom taxonomy
-			$labelsTaxonomy = [
-				'name'              => esc_html_x('Сountries', 'taxonomy general name', 'storefront-child'),
+
+			// Register custom taxonomy
+			$taxonomy_name = 'countries';
+			$post_types = ['cities'];
+
+			$labels = [
+				'name'              => esc_html_x('Countries', 'taxonomy general name', 'storefront-child'),
 				'singular_name'     => esc_html_x('Country', 'taxonomy singular name', 'storefront-child'),
-				'search_items'      => esc_html__('Search Сountries', 'storefront-child'),
-				'all_items'         => esc_html__('All Сountries', 'storefront-child'),
-				'view_item'         => esc_html__('View Country', 'storefront-child'),
-				'parent_item'       => esc_html__('Parent Genre', 'storefront-child'),
+				'search_items'      => esc_html__('Search Countries', 'storefront-child'),
+				'all_items'         => esc_html__('All Countries', 'storefront-child'),
+				'parent_item'       => esc_html__('Parent Country', 'storefront-child'),
 				'parent_item_colon' => esc_html__('Parent Country:', 'storefront-child'),
 				'edit_item'         => esc_html__('Edit Country', 'storefront-child'),
 				'update_item'       => esc_html__('Update Country', 'storefront-child'),
 				'add_new_item'      => esc_html__('Add New Country', 'storefront-child'),
 				'new_item_name'     => esc_html__('New Country Name', 'storefront-child'),
-				'not_found'         => esc_html__('No Сountries Found', 'storefront-child'),
-				'back_to_items'     => esc_html__('← Back to Country', 'storefront-child'),
-				'menu_name'         => esc_html__('Сountries', 'storefront-child'),
+				'menu_name'         => esc_html__('Countries', 'storefront-child'),
 			];
-			$argsTaxonomy = [
-				'hierarchical' 			=> true,
-				'show_ui' 					=> true,
+
+			$args = [
+				'hierarchical'      => true,
+				'labels'            => $labels,
+				'show_ui'           => true,
 				'show_admin_column' => true,
-				'query_var' 				=> true,
-				'rewrite' 					=> ['slug' => 'countries'],
-				'labels' 						=> $labelsTaxonomy,
+				'show_in_rest'      => true,
+				'query_var'         => true,
+				'rewrite'           => ['slug' => 'country'],
+				'capabilities' => [
+					'manage_terms' => 'manage_categories',
+					'edit_terms'   => 'manage_categories',
+					'delete_terms' => 'manage_categories',
+					'assign_terms' => 'edit_posts',
+				],
 			];
-			register_taxonomy('сountries', 'cities', $argsTaxonomy);
+
+			register_taxonomy($taxonomy_name, $post_types, $args);
+		}
+
+		public function display_countries_list()
+		{
+			global $wpdb;
+
+			$countries = $wpdb->get_results(
+				$wpdb->prepare("
+            SELECT t.name, t.slug 
+            FROM {$wpdb->terms} t 
+            INNER JOIN {$wpdb->term_taxonomy} tt 
+            ON t.term_id = tt.term_id 
+            WHERE tt.taxonomy = %s 
+            ORDER BY t.name ASC
+        ", 'countries')
+			);
+
+			if (!empty($countries)) {
+				echo '<div class="countries-list">';
+				echo '<h3>' . esc_html__('Список стран', 'storefront-child') . '</h3>';
+				echo '<ul>';
+				foreach ($countries as $country) {
+					echo '<li>';
+					echo '<a href="' . esc_url(get_term_link($country->slug, 'countries')) . '">';
+					echo esc_html($country->name);
+					echo '</a>';
+					echo '</li>';
+				}
+				echo '</ul>';
+				echo '</div>';
+			} else {
+				echo '<p>' . esc_html__('Страны не найдены', 'storefront-child') . '</p>';
+			}
 		}
 	}
 }
